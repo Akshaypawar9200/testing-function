@@ -5,62 +5,46 @@ const createUsers = async (req, res) => {
     const { firstName, lastName, email } = req.body;
     const emailRegex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
     if (!firstName && !lastName) {
-      let err= new Error("badRequest: body is empty");
-      err.statusCode=400
-      throw err
+      throw new Error("badRequest: body is empty");
     }
     if (!firstName) {
-      let err= new Error("badRequest: firstname is empty");
-      err.statusCode=400
-      throw err
+      throw new Error("badRequest: firstname is empty");
     }
     if (!lastName) {
-      let err= new Error("badRequest: lastName is empty");
-      err.statusCode=400
-      throw err
-    } 
+      throw new Error("badRequest: lastName is empty");
+    }
     if (!email) {
-      let err= new Error("badRequest: email is empty");
-      err.statusCode=400
-      throw err
-    }
- 
-    if(typeof firstName!="string"){
-      let err= new Error("badRequest: plz enter firstname in string format");
-      err.statusCode=400
-      throw err
-    }
-    if(typeof lastName!="string"){
-      let err= new Error("badRequest: plz enter lastName in string format");
-      err.statusCode=400
-      throw err
-    }
-    if(typeof email!="string"){
-      let err= new Error("badRequest: plz enter email in string format");
-      err.statusCode=400
-      throw err
+      throw new Error("badRequest: email is empty");
     }
 
-   
+    if (typeof firstName != "string") {
+      throw new Error("badRequest: plz enter firstname in string format");
+    }
 
+    if (typeof lastName != "string") {
+      throw new Error("badRequest: plz enter lastName in string format");
+    }
+    if (typeof email != "string") {
+      throw new Error("badRequest: plz enter email in string format");
+    }
 
     if (!emailRegex.test(email)) {
-      let err= new Error("badRequest: email is invalid");
-      err.statusCode=400
-      throw err
+      throw new Error("badRequest: email is invalid");
     }
-   
-    const data = await Service.createUser(req.body);
 
-    // let  err= new Error("user service for create user rejected")
-    // err.statusCode=500
-    // throw err
+    let data = await Service.createUser(req.body);
+    
+    // let data
+    // try {
+    //  data= await Service.createUser(req.body);
+    // } catch (error) {
+    //   return res.status(200).send(data);
+    // }
+
 
     return res.status(200).send(data);
   } catch (error) {
-  
-    return res.status(error.statusCode).send({ message: error.message });
-    
+    return res.status(500).send({ message: error.message });
   }
 };
 

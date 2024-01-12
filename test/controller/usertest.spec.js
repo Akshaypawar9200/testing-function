@@ -73,33 +73,32 @@ describe("#UserController ", () => {
 
               userController
                 .createUsers(cloneDeep(req), res)
-                .then((res) => {
+                .then((res) => {  
+
+                  console.log("🚀 ~ .then ~ testCase.mockData:", testCase.mockData)
                   expect(res.data, "Incorrect response data").to.deep.equal(
                     testCase.mockData
                   );
+
                   expect(res.statusCode, "Incorrect status code").to.be.equal(
                     testCase.status
                   );
-               
                   const actualErrorMessage = res.data.message;
                   const expectedErrorMessage = testCase.expectedErrorMessage;
                   expect(actualErrorMessage).to.equal(expectedErrorMessage);
-                  
                   const result = userSerivceStub.createUser.calledWith(
                     req.body
                   );
                   expect(
                     result,
-                    "createUser was not called with the correct arguments"
+                    "createUser was not called with the correct req.body (you change body)"
                   ).to.be.equal(true);
                   done();
-                })  
+                })
                 .catch((err) => {
                   done(err);
                 })
-                .catch((err) => {
-                  done(`Error in createUsers promise: ${err}`);
-                });
+          
             });
 
             afterEach(() => {
@@ -112,7 +111,6 @@ describe("#UserController ", () => {
               const req = {
                 body: testCase.requestBody,
               };
-              userSerivceStub.createUser.throws(new Error("user service for create user rejected"));
               userController
                 .createUsers(req, res, next)
                 .then((res) => {
@@ -135,46 +133,37 @@ describe("#UserController ", () => {
       }
     });
 
-
-
-
-
-
-
-
-    // describe("Check if service reject", () => {
-    //   it("dhsagdhsag", (done) => {
-    //     const req = {
-    //      body:{
-    //       firstName:"akshay",
-    //       lastName:"pawar",
-    //       email:"akshay@gmail.com"
-        
-    //      }
-    //     };
-    //     userSerivceStub.createUser.rejects(new Error("unexpected error in create user"));
-    //     userController
-    //       .createUsers(req, res, next)
-    //       .then((res) => {
-    //         console.log(res);
-    //         // const expectedStatusCode = testCase.status;
-    //         // const actualStatusCode = res.statusCode;
-
-    //         // const actualErrorMessage = res.data.message;
-    //         // const expectedErrorMessage = testCase.expectedErrorMessage;
-
-    //         // expect(actualStatusCode).to.equal(expectedStatusCode);
-    //         // expect(actualErrorMessage).to.equal(expectedErrorMessage);
-    //         done();
-    //       })
-    //       .catch((err) => {
-    //         done(err);
-    //       });
-    //   });
-    // });
-
-
-
-
+    describe("Check if service reject", () => {
+      beforeEach(() => {
+        const err = new Error("unexpected error in create user");
+        userSerivceStub.createUser.throws(err);
+      });
+      it("error occcur in service", (done) => {
+        const req = {
+          body: {
+            firstName: "akshay",
+            lastName: "pawar",
+            email: "akshay@gmail.com",
+          },
+        };
+        userController
+          .createUsers(req, res, next)
+          .then((res) => {
+            if (!res.data) {
+              throw new Error("servive error");
+            }
+            const expectedStatusCode = 500;
+            const expectedErrorMessage = "unexpected error in create user";
+            const actualStatusCode = res.statusCode;
+            const actualErrorMessage = res.data.message;
+            expect(actualStatusCode).to.equal(expectedStatusCode);
+            expect(actualErrorMessage).to.equal(expectedErrorMessage);
+            done();
+          })
+          .catch((err) => {
+            done(err);
+          });
+      });
+    });
   });
 });
