@@ -1,50 +1,61 @@
-const db = require("../../models");
+const userConfig=require('../../model-config/userConfig')
 class UserService {
   constructor() {}
   
-  async createUser(body) {
+  async createUser(userInfo) {
     try {
-      const data = await db.user.create(body);
+
+      let data = await userConfig.model.create(userInfo);
       return data;
     } catch (error) {
-      console.log(error);
+      let errors=new Error("unexpected error")
+      throw errors
     }
   }
 
   async getAllUser() {
     try {
-      const data = await db.user.findAll();
+   
+      const data = await userConfig.model.findAll();
       return data;
     } catch (error) {
-      console.log(error);
+      let errors=new Error("unexpected error")
+      throw errors
     }
   }
 
-  async updateUser(body, id) {
+  async updateUser(userInfo,id) {
     try {
-      const data = await db.user.update(
-        { firstName: body.firstName, lastName: body.lastName },
-        { where: { id: id } }
+      const data = await userConfig.model.update(
+        { firstName: userInfo.firstName, lastName: userInfo.lastName,email:userInfo.email },
+        { where: { id:id } }
       );
-      return data;
+      return "user updated"
+      // return data;
     } catch (error) {
-      console.log(error);
+      let errors=new Error("unexpected error")
+      throw errors
     }
   }
+
   async getUserById(id){
     try {
-      const data= await db.user.findOne({where:{id:id}})
+      const data= await userConfig.model.findOne({where:{id:id}})
       return data
     } catch (error) {
-      console.log(error.message);
+      let errors=new Error("unexpected error")
+      throw errors
     }
   }
+
   async deleteUser(id) {
     try {
-      const data = await db.user.destroy({ where: { id: id } });
+      const data = await userConfig.model.destroy({ where: { id: id } });
+      return "user deleted"
       return data;
     } catch (error) {
-      console.log(error);
+      let errors=new Error("unexpected error")
+      throw errors
     }
   }
 }
