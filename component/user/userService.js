@@ -1,61 +1,65 @@
-const userConfig=require('../../model-config/userConfig')
+const { Op } = require("sequelize");
+const userConfig = require("../../model-config/userConfig");
 class UserService {
   constructor() {}
-  
+
   async createUser(userInfo) {
     try {
-
+      
       let data = await userConfig.model.create(userInfo);
       return data;
     } catch (error) {
-      let errors=new Error("unexpected error")
-      throw errors
+      let errors = new Error("unexpected error");
+      throw errors;
     }
   }
 
-  async getAllUser() {
+  async getAllUser(limit, page) {
     try {
-   
-      const data = await userConfig.model.findAll();
+    
+      let data = await userConfig.model.findAll({
+        page:page,
+        limit: limit
+      });
       return data;
     } catch (error) {
-      let errors=new Error("unexpected error")
-      throw errors
+      let errors = new Error("unexpected error");
+      throw errors;
     }
   }
 
-  async updateUser(userInfo,id) {
+  async updateUser(userInfo, id) {
     try {
+userInfo.sjgdhgfd="dshdgshgd"
       const data = await userConfig.model.update(
-        { firstName: userInfo.firstName, lastName: userInfo.lastName,email:userInfo.email },
-        { where: { id:id } }
+        userInfo,
+        { where: { id:{[Op.eq]: id} } }
       );
-      return "user updated"
+      return "user updated";
       // return data;
     } catch (error) {
-      let errors=new Error("unexpected error")
-      throw errors
+      let errors = new Error("unexpected error");
+      throw errors;
     }
   }
 
-  async getUserById(id){
+  async getUserById(id) {
     try {
-      const data= await userConfig.model.findOne({where:{id:id}})
-      return data
-    } catch (error) {
-      let errors=new Error("unexpected error")
-      throw errors
-    }
-  }
-
-  async deleteUser(id) {
-    try {
-      const data = await userConfig.model.destroy({ where: { id: id } });
-      return "user deleted"
+      const data = await userConfig.model.findOne(   { where: { id:{[Op.eq]: id} } });
       return data;
     } catch (error) {
-      let errors=new Error("unexpected error")
-      throw errors
+      let errors = new Error("unexpected error");
+      throw errors;
+    }
+  }
+  async deleteUser(id) {
+    try {
+      const data = await userConfig.model.destroy(   { where: { id:{[Op.eq]: id} } });
+      return "user deleted";
+      return data;
+    } catch (error) {
+      let errors = new Error("unexpected error");
+      throw errors;
     }
   }
 }

@@ -11,8 +11,8 @@ class UserConfig{
                 email:"email"
             }
         )
-     
     
+     
         this.model=db.user
         this.modelName=db.user.Name
         this.tableName=db.user.tableName

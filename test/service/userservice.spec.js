@@ -2,6 +2,13 @@ const sinon = require("sinon");
 const proxyquire = require("proxyquire");
 const { expect } = require("chai");
 const { cloneDeep } = require("lodash");
+const { Op } = require("sequelize");
+
+// const sequalizeStub={
+//   Op:{
+//     eq:sinon.stub()
+//   }
+// }
 
 const userConfigStub = {
   model: {
@@ -15,6 +22,7 @@ const userConfigStub = {
 
 const userService = proxyquire("../../component/user/userService", {
   "../../model-config/userConfig": userConfigStub,
+  // sequelize:sequalizeStub
 });
 // for create user
 describe("#userService ", () => {
@@ -40,12 +48,13 @@ describe("#userService ", () => {
         userService
           .createUser(cloneDeep(userInfo))
           .then((res) => {
-         
             const expectedData = mockData;
             const actualData = res;
 
             expect(expectedData).to.deep.equal(actualData);
-            const result = userConfigStub.model.create.calledWith(cloneDeep(userInfo));
+            const result = userConfigStub.model.create.calledWith(
+              cloneDeep(userInfo)
+            );
             expect(
               result,
               "createUser service was not called with the correct user data (you change data)"
@@ -85,7 +94,7 @@ describe("#userService ", () => {
   // for update user
   describe(" updateUser - update a user", () => {
     const mockData = {
-      id:1,
+      id: 1,
       firstName: "Akshay",
       lastName: "pawar",
       email: "akshay@gmail.com",
@@ -99,26 +108,32 @@ describe("#userService ", () => {
       });
       it("update user", (done) => {
         const userInfo = {
-          id:1,
+          id: 1,
           firstName: "Akshay",
           lastName: "pawar",
           email: "akshay@gmail.com",
         };
-        const id=1
+        const id = 1;
         userService
-          .updateUser(cloneDeep(userInfo),id)
+          .updateUser(cloneDeep(userInfo), id)
           .then((res) => {
             const expectedMessage = "user updated";
             const actualMessage = res;
             expect(expectedMessage).to.equal(actualMessage);
             const result = userConfigStub.model.update.calledWith(
-              { firstName: userInfo.firstName, lastName: userInfo.lastName ,email:userInfo.email},
-              { where: { id: id } }
-            )
+              // {
+              //   firstName: userInfo.firstName,
+              //   lastName: userInfo.lastName,
+              //   email: userInfo.email,
+              // },
+              userInfo,
+              {where: { id:{[Op.eq]: id} } }
+            );
             expect(
               result,
               "updateUser service was not called with the correct user data (you change data)"
             ).to.be.equal(true);
+           
             done();
           })
           .catch((err) => {
@@ -175,9 +190,9 @@ describe("#userService ", () => {
             const actualMessage = res;
 
             expect(expectedMessage).to.equal(actualMessage);
-            const result = userConfigStub.model.destroy.calledWith(
-              { where: { id: id } }
-            )
+            const result = userConfigStub.model.destroy.calledWith({
+               where: { id:{[Op.eq]: id} } 
+            });
             expect(
               result,
               "deleteUser service was not called with the correct user id (you change data)"
@@ -217,6 +232,8 @@ describe("#userService ", () => {
       lastName: "pawar",
       email: "akshay@gmail.com",
     };
+    const limit = 2;
+    const page = 2;
     context("all users ", () => {
       beforeEach(() => {
         userConfigStub.model.findAll.resolves(cloneDeep(mockData));
@@ -226,12 +243,14 @@ describe("#userService ", () => {
       });
       it("all user", (done) => {
         userService
-          .getAllUser()
+          .getAllUser(cloneDeep(limit),page)
           .then((res) => {
             const expectedData = mockData;
             const actualData = res;
-
             expect(expectedData).to.deep.equal(actualData);
+            const result = userConfigStub.model.findAll.getCall(0).args
+            expect(result[0].limit).to.deep.equal(limit)
+            expect(result[0].page).to.deep.equal(page) 
             done();
           })
           .catch((err) => {
@@ -261,6 +280,7 @@ describe("#userService ", () => {
   // findone
   describe(" getUserById - get specific user", () => {
     const mockData = {
+      id: 1,
       firstName: "Akshay",
       lastName: "pawar",
       email: "akshay@gmail.com",
@@ -273,12 +293,7 @@ describe("#userService ", () => {
       afterEach(() => {
         sinon.restore();
       });
-      it("all user", (done) => {
-        const userInfo = {
-          firstName: "Akshay",
-          lastName: "pawar",
-          email: "akshay@gmail.com",
-        };
+      it("one user", (done) => {
         userService
           .getUserById(cloneDeep(id))
           .then((res) => {
@@ -286,9 +301,9 @@ describe("#userService ", () => {
             const actualData = res;
 
             expect(expectedData).to.deep.equal(actualData);
-            const result = userConfigStub.model.findOne.calledWith(
-              { where: { id: id } }
-            )
+            const result = userConfigStub.model.findOne.calledWith({
+              where: { id:{[Op.eq]: id} } 
+            });
             expect(
               result,
               "User id service was not called with the correct user id (you change data)"
@@ -302,12 +317,6 @@ describe("#userService ", () => {
     });
     context("throws error if db reject while collecting all users", () => {
       it("error occur in get all user", (done) => {
-        const userInfo = {
-          firstName: "Akshay",
-          lastName: "pawar",
-          email: "akshay@gmail.com",
-        };
-
         userConfigStub.model.findOne.throws(
           new Error("unexpected error from db")
         );

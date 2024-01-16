@@ -50,7 +50,8 @@ const createUsers = async (req, res) => {
 
 const allUsers = async (req, res) => {
   try {
-    const data = await Service.getAllUser();
+    const{limit,page}=req.query
+    const data = await Service.getAllUser(limit,page);
     res.status(200).send(data);
   } catch (error) {
     res.status(500).send(error);
@@ -70,7 +71,7 @@ const getById = async (req, res) => {
 const updateUsers = async (req, res) => {
   try {
     const { id } = req.params;
-    const { firstName, lastName } = req.body;
+    const { firstName, lastName,email } = req.body;
     const data = await Service.updateUser(req.body, id);
     res.status(200).send("user updated successfully");
   } catch (error) {

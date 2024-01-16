@@ -73,9 +73,7 @@
 
 //               userController
 //                 .createUsers(cloneDeep(req), res)
-//                 .then((res) => {  
-
-                  
+//                 .then((res) => {
 //                   expect(res.data, "Incorrect response data").to.deep.equal(
 //                     testCase.mockData
 //                   );
@@ -97,8 +95,7 @@
 //                 })
 //                 .catch((err) => {
 //                   done(err);
-//                 })
-          
+//                 });
 //             });
 
 //             afterEach(() => {
