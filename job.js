@@ -1,30 +1,38 @@
-import Sequelize from 'sequelize';
-const db=require('./models')
+const { Sequelize, Op } = require("sequelize");
+const db=require("./models")
 
 async function getJobById(inputs) {
-    const { jobId } = inputs;
-  
-    const result = await db.user.findOne({
-      where: {
-        id: jobId,
-      }
-      // attributes: [
-      //   ['id', 'jobId'],
-      //   [Sequelize.col('File.id'), 'fileId'],
-      //   [Sequelize.col('File.name'), 'fileName'],
-      //   [Sequelize.col('File.location'), 'fileLocation'],
-      //   [Sequelize.col('File.type'), 'fileType'],
-      // ],
-      // include: [
-      //   {
-      //     model: File,
-      //     attributes: [],
-      //     required: true,
-      //   },
-      // ],
-      // raw: true,
-    });
-  
-    return result;
-  }
-  
+ try {
+   const result = await db.Job.findOne({
+    where: {
+      id: {
+        [Op.eq]: inputs,
+      },
+    },
+    attributes:  [
+      ['id', 'jobId'],
+      [Sequelize.col('File.id'), 'fileId'],
+      [Sequelize.col('File.name'), 'fileName'],
+      [Sequelize.col('File.location'), 'fileLocation'],
+      [Sequelize.col('File.type'), 'fileType'],
+    ],
+    include: [
+      {
+        model: db.file,
+        attributes: [],
+        required: true,
+      },
+    ],
+    raw: true,
+    
+  });
+  return result;
+ } catch (error) {
+  let errors = new Error("unexpected error");
+  throw errors;
+ }
+
+ 
+}
+module.exports={getJobById}
+

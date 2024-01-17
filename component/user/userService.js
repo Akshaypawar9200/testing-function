@@ -16,7 +16,7 @@ class UserService {
 
   async getAllUser(limit, page) {
     try {
-    
+
       let data = await userConfig.model.findAll({
         page:page,
         limit: limit
@@ -30,7 +30,7 @@ class UserService {
 
   async updateUser(userInfo, id) {
     try {
-userInfo.sjgdhgfd="dshdgshgd"
+
       const data = await userConfig.model.update(
         userInfo,
         { where: { id:{[Op.eq]: id} } }
@@ -54,6 +54,7 @@ userInfo.sjgdhgfd="dshdgshgd"
   }
   async deleteUser(id) {
     try {
+      
       const data = await userConfig.model.destroy(   { where: { id:{[Op.eq]: id} } });
       return "user deleted";
       return data;
