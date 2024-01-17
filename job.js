@@ -3,6 +3,7 @@ const db=require("./models")
 
 async function getJobById(inputs) {
  try {
+  // console.log("#####################",Op);
    const result = await db.Job.findOne({
     where: {
       id: {
@@ -24,8 +25,9 @@ async function getJobById(inputs) {
       },
     ],
     raw: true,
-    
+  
   });
+  
   return result;
  } catch (error) {
   let errors = new Error("unexpected error");

@@ -9,95 +9,54 @@ const dbStub = {
     findOne: sinon.stub(),
   },
 };
+const sequalizeStub = {
+  Op: {
+    eq: sinon.stub(),
+  },
+};
 
 const jobService = proxyquire("../../job.js", {
   "./models": dbStub,
+  sequelize: sequalizeStub,
 });
 
 describe("jobService", () => {
   describe("getJobById - get job by id", () => {
-    let inputs = 1;
-
-    context("when finding user by id successfully", () => {
-      const expectedWhereClause = {
-        id: { [Sequelize.Op.eq]: inputs },
-      };
-
-      const expectedAttributes = [
+    let jobId = 1;
+    const expectedResult = {
+      where: {
+        id: {
+          [sequalizeStub.Op.eq]: jobId,
+        },
+      },
+      attributes: [
         ["id", "jobId"],
         [Sequelize.col("File.id"), "fileId"],
         [Sequelize.col("File.name"), "fileName"],
         [Sequelize.col("File.location"), "fileLocation"],
         [Sequelize.col("File.type"), "fileType"],
-      ];
-      const exepectedInclude = [
+      ],
+      include: [
         {
-          model: "File_model",
+          model: dbStub.file,
           attributes: [],
           required: true,
         },
-      ];
-      const expectedRaw = true;
+      ],
+      raw: true,
+    };
 
+    context("when finding job by id successfully", () => {
       before(() => {
         dbStub.Job.findOne.resolves("job find successfully");
       });
 
       it("should get the job by id", (done) => {
         jobService
-          .getJobById(inputs)
+          .getJobById(jobId)
           .then(() => {
             const result = dbStub.Job.findOne.getCall(0).args;
-
-            const actualWhereClause = result[0].where;
-            expect(
-              actualWhereClause,
-              "Expected where clause to match"
-            ).to.deep.equal(expectedWhereClause);
-
-            const actualAttributes = result[0].attributes;
-            expect(
-              actualAttributes,
-              "Expected attributes to match"
-            ).to.be.deep.equal(expectedAttributes);
-
-            const actualInclude = result[0].include;
-            expect(actualInclude, "Expected include to match").to.be.deep.equal(
-              exepectedInclude
-            );
-
-            const actualRaw = result[0].raw;
-            expect(actualRaw, "Expected raw to match").to.be.deep.equal(
-              expectedRaw
-            );
-
-            const results = dbStub.Job.findOne.calledWith({
-              where: {
-                id: {
-                  [Sequelize.Op.eq]: inputs,
-                },
-              },
-              attributes: [
-                ["id", "jobId"],
-                [Sequelize.col("File.id"), "fileId"],
-                [Sequelize.col("File.name"), "fileName"],
-                [Sequelize.col("File.location"), "fileLocation"],
-                [Sequelize.col("File.type"), "fileType"],
-              ],
-              include: [
-                {
-                  model: dbStub.file,
-                  attributes: [],
-                  required: true,
-                },
-              ],
-              raw: true,
-            });
-            expect(
-              results,
-              "Expected changes to occur in where clause"
-            ).to.be.equal(true);
-
+            expect(expectedResult).to.deep.equal(result[0]);
             done();
           })
           .catch((err) => {
@@ -110,7 +69,7 @@ describe("jobService", () => {
       it("should throw an error", (done) => {
         dbStub.Job.findOne.throws(new Error("unexpected error from db"));
         jobService
-          .getJobById(inputs)
+          .getJobById(jobId)
           .then(() => {
             done(new Error("Unexpected success, expected an error from db"));
           })

@@ -320,7 +320,7 @@ describe("#userService", () => {
           new Error("unexpected error from db")
         );
         userService.getUserById(id).then(() => {
-          done(new Error("error"));
+          done(new Error("Unexpected success, expected an error from db"));
         }).catch((err) => {
           expect(err.message).to.equal("unexpected error");
           done();
